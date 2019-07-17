@@ -95,14 +95,15 @@ Picker.util.sendDataToServer = function (url, data) {
 
 Picker.data = function () {
     var data = [];
+    var content = {}
 
     var title = document.title;
     var href = location.href;
     // var referrer = opener.location.href
     var referrer = document.referrer;
 
-    data.push({ "pageInstanceID": "" });
-    data.push({ "user": [] });
+    content.pageInstanceID = "";
+    content.user = [];
     user = {
         "profile": {
             "profielInfo": {
@@ -110,25 +111,23 @@ Picker.data = function () {
             }
         }
     }
-    data.user.push(user)
+    content.user.push(user)
 
-    data.push({ "event": [] });
+    content.event = []
     evt = Picker.util.createEvent("View", "View Home Page")
-    data.event.push(evt)
+    content.event.push(evt)
 
-    data.push({
-        "page": {
-            "pageInfo": {
-                "pageName": title,
-                "url": href,
-                "referringURL": referrer,
-            }
+    content.page = {
+        "pageInfo": {
+            "pageName": title,
+            "url": href,
+            "referringURL": referrer,
         },
         attibutes: {
             duration: "", // Unnesscery Code
         }
-    });
-
-    // console.log(data);
+    }
+    data.push(content)
+    console.log(data);
     return data
 }();
