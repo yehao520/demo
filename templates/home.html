@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <title>TEST</title>
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
     <script type="text/javascript" src="../static/track.js"></script>
 </head>
 
@@ -17,19 +18,16 @@
 <script>
     function showVisitorInfo(event = "Click", action = "Click TEST Button") {
         var evt = Picker.util.createEvent(event, action);
-        Picker.data[0].event.push(evt)
+        Picker.util.updateEvent(evt)
 
         var data = Picker.data
 
-        Picker.util.sendDataToServer('/track/',
-            {
-                data: JSON.stringify(data)
-            });
+        Picker.util.sendDataToServer('/track/', {data: JSON.stringify(data)});
     };
 
     function routine(event = "Routine", action = "View Next Page") {
         var evt = Picker.util.createEvent(event, action);
-        Picker.data[0].event.push(evt)
+        Picker.data.event.push(evt)
         Picker.util.sendDataToServer('/track/',
             {
                 data: JSON.stringify(data)
