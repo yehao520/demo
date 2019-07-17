@@ -1,7 +1,7 @@
 Picker = {};
 isIE = false;
 
-document.write('<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>');
+// document.write('<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>');
 
 Picker.setting = {
     project: '',
@@ -38,11 +38,57 @@ Picker.util.createEvent = function (name, action) {
     }
 };
 
+/* 添加事件到event, event.push() */
+Picker.util.updateEvent = function (evt) {
+    Picker.data.event.push(evt)
+};
+
+/* 建议后端计算 */
 Picker.util.calculateDuration = function (start, end) {
     start = start || Picker.data.event[0]
     end = end || Picker.data.event[Picker.data.event.length + 1]
     return end - start
 }
+
+/* 设置Cookie
+   name: cookie名
+   value: cookie值
+   days: cookie存活时间
+*/
+Picker.util.setCookie = function (name, value, days) {
+    if (typeof value != "undefined") {
+        var date = new Date();
+        date.setDate(date.getDate() + days);
+        document.cookie = name + "=" + escape(value) + ((typeof days == "undefined") ? "" : ";expiredays=" + date.toGMTString());
+    }
+    return Picker.util.getCookie(name);
+};
+
+/**
+ * 获取Cookie
+ */
+Picker.util.getCookie = function (name) {
+    if (document.cookie.length > 0) {
+        var start = document.cookie.indexOf(name + "=");
+        if (start > -1) {
+            start = start + name.length + 1;
+            var end = document.cookie.indexOf(";", start);
+            if (end == -1) {
+                end = document.cookie.length;
+            }
+            return unescape(document.cookie.substring(start, end));
+        }
+    }
+    return "";
+};
+
+/**
+ * 添加事件监听器
+ */
+Picker.util.attachEvent = function(target, type, listener) {
+    if(isIE) target.attachEvent('on' + type, listener);
+    else target.addEventListener(type, listener, false);
+};
 
 /* 保存数据 */
 Picker.util.sendDataToServer = function (url, data) {
@@ -90,44 +136,48 @@ Picker.util.sendDataToServer = function (url, data) {
         url: url,
         data: data,
         dataType: "Json",
-    })
+    });
 };
 
 Picker.data = function () {
-    var data = [];
-    var content = {}
+    var data = {};
 
     var title = document.title;
     var href = location.href;
     // var referrer = opener.location.href
     var referrer = document.referrer;
 
-    content.pageInstanceID = "";
-    content.user = [];
+    data.pageInstanceID = "";
+    data.user = [];
     user = {
         "profile": {
             "profielInfo": {
-                "profileID": "aid" + Picker.util.getAnonymousID(),
+                // "profileID": "aid" + Picker.util.getAnonymousID(),
             }
         }
     }
-    content.user.push(user)
+    data.user.push(user)
 
-    content.event = []
-    evt = Picker.util.createEvent("View", "View Home Page")
-    content.event.push(evt)
+    data.event = []
+    evt = Picker.util.createEvent('Viewed Page', 'Viewed ' + document.title + ' Page')
+    data.event.push(evt)
 
-    content.page = {
+    data.page = {
         "pageInfo": {
             "pageName": title,
             "url": href,
             "referringURL": referrer,
-        },
-        attibutes: {
-            duration: "", // Unnesscery Code
         }
     }
-    data.push(content)
-    console.log(data);
+    Picker.util.sendDataToServer('/track/', { data: JSON.stringify(data) })
+    // console.log(data);
     return data
 }();
+
+/*
+Picker.util.sendDataToServer(
+    '/track/',
+    {
+        data: JSON.stringify(Picker.util.createEvent('Viewed Page', 'Viewed ' + document.title + ' Page'))
+    })
+*/
