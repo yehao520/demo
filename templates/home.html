@@ -10,32 +10,29 @@
 <body>
     <input type="button" value="TEST" onclick="showVisitorInfo();">
     <hr>
-    <a href="/vh/">JUMP</a>
+    <a href="/vh/" onclick="roution();">JUMP</a>
 </body>
 
 </html>
 <script>
     function showVisitorInfo(event = "Click", action = "Click TEST Button") {
         var evt = Picker.util.createEvent(event, action);
-        Picker.data.event.push(evt)
-        console.log(evt);
-        console.log(Picker.data);
+        Picker.data[0].event.push(evt)
 
         var data = Picker.data
 
         Picker.util.sendDataToServer('/track/',
             {
-                event: JSON.stringify(evt),
-                page: '',
-                data: JSON.stringify(data)
+                data: JSON.stringify(data);
             });
     };
-    // Picker.util.sendDataToServer('/track/',
-    //     // {
-    //     //     name: "张三",
-    //     //     age: 18,
-    //     //     gender: "Female"
-    //     // }
-    //     JSON.stringify(Picker.data)
-    // );
+
+    function routine(event = "Routine", action = "View Next Page") {
+        var evt = Picker.util.createEvent(event, action);
+        Picker.data[0].event.push(evt)
+        Picker.util.sendDataToServer('/track/',
+            {
+                data: JSON.stringify(data);
+            });
+    }
 </script>
