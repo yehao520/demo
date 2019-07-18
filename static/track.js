@@ -59,7 +59,7 @@ Picker.util.setCookie = function (name, value, days) {
     if (typeof value != "undefined") {
         var date = new Date();
         date.setDate(date.getDate() + days);
-        document.cookie = name + "=" + escape(value) + ((typeof days == "undefined") ? "" : ";expiredays=" + date.toGMTString());
+        document.cookie = name + "=" + escape(value) + ((typeof days == "undefined") ? "" : ";expiredays=" + date.toGMTString()) + "; path=/";
     }
     return Picker.util.getCookie(name);
 };
@@ -83,10 +83,54 @@ Picker.util.getCookie = function (name) {
 };
 
 /**
+ *  获取浏览器信息
+ */
+Picker.util.getExplorerInfo = function () {
+    var explorer = window.navigator.userAgent.toLowerCase();
+    //ie 
+    if (explorer.indexOf("msie") >= 0) {
+        var ver = explorer.match(/msie ([\d.]+)/)[1];
+        return { type: "IE", version: ver };
+    }
+    //firefox
+    else if (explorer.indexOf("firefox") >= 0) {
+        var ver = explorer.match(/firefox\/([\d.]+)/)[1];
+        return { type: "Firefox", version: ver };
+    }
+    //Chrome
+    else if (explorer.indexOf("chrome") >= 0) {
+        var ver = explorer.match(/chrome\/([\d.]+)/)[1];
+        return { type: "Chrome", version: ver };
+    }
+    //Opera 
+    else if (explorer.indexOf("opera") >= 0) {
+        var ver = explorer.match(/opera.([\d.]+)/)[1];
+        return { type: "Opera", version: ver };
+    }
+    //Safari 
+    else if (explorer.indexOf("Safari") >= 0) {
+        var ver = explorer.match(/version\/([\d.]+)/)[1];
+        return { type: "Safari", version: ver };
+    }
+
+    // Edge判断不出来
+}
+
+/**
+ * 获取屏幕分辨率
+ */
+Picker.util.getScreenResolution = function () {
+    var width = screen.width;
+    var height = screen.height;
+
+    return width + '*' + height
+};
+
+/**
  * 添加事件监听器
  */
-Picker.util.attachEvent = function(target, type, listener) {
-    if(isIE) target.attachEvent('on' + type, listener);
+Picker.util.attachEvent = function (target, type, listener) {
+    if (isIE) target.attachEvent('on' + type, listener);
     else target.addEventListener(type, listener, false);
 };
 
@@ -139,6 +183,9 @@ Picker.util.sendDataToServer = function (url, data) {
     });
 };
 
+var aid = 'aid' + Picker.util.getAnonymousID()
+Picker.util.setCookie('aid', aid, 1)
+
 Picker.data = function () {
     var data = {};
 
@@ -152,7 +199,7 @@ Picker.data = function () {
     user = {
         "profile": {
             "profielInfo": {
-                // "profileID": "aid" + Picker.util.getAnonymousID(),
+                "profileID": "",
             }
         }
     }
@@ -169,15 +216,18 @@ Picker.data = function () {
             "referringURL": referrer,
         }
     }
-    Picker.util.sendDataToServer('/track/', { data: JSON.stringify(data) })
-    // console.log(data);
+
+    Picker.util.sendDataToServer(
+        '/track/',
+        {
+            ud: JSON.stringify(data),
+            dd: JSON.stringify({
+                ip: '127.0.0.1',
+                browser: Picker.util.getExplorerInfo(),
+                resolution: Picker.util.getScreenResolution()
+            })
+        }
+    )
     return data
 }();
 
-/*
-Picker.util.sendDataToServer(
-    '/track/',
-    {
-        data: JSON.stringify(Picker.util.createEvent('Viewed Page', 'Viewed ' + document.title + ' Page'))
-    })
-*/

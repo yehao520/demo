@@ -22,7 +22,7 @@
 
         var data = Picker.data
 
-        Picker.util.sendDataToServer('/track/', {data: JSON.stringify(data)});
+        Picker.util.sendDataToServer('/track/', { data: JSON.stringify(data) });
     };
 
     function routine(event = "Routine", action = "View Next Page") {
@@ -33,4 +33,9 @@
                 data: JSON.stringify(data)
             });
     }
+    console.log(screen.width, screen.height)
+    console.log(navigator.userAgent.toLowerCase())
+
+    var a = Picker.util.getExplorerInfo()
+    console.log(a)
 </script>
