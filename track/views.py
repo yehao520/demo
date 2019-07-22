@@ -21,22 +21,25 @@ def track(request):
     if request.method == 'POST':
         # ck = request.COOKIES.get('aid', None)
         ip = get_ip(request)
-        dd1 = json.loads(request.POST.get('dd', None))
-        dd1['ip'] = ip
-        dd2 = sort_dict_by_key(dd1)
-        abs = to_digest(str(dd2))
+        dt = json.loads(request.POST.get('dt', None))
+        dd = dt['dd']
+        dd['ip'] = ip
+        sorted_dd = sort_dict_by_key(dd)
+        abs = to_digest(str(sorted_dd))
         col = conn.conn2mongo()
         keys = conn.find(col)
 
-        data = json.loads(request.POST.get('ud', None))
+        data = dt['ud']
+        update = 0
         for key in keys:
             if key['uuid'] == abs:
-
                 key['event'].append(data['event'][0])
+                _id = key.pop('_id')
                 # 更新数据
                 res = conn.update(col, {'uuid': abs}, {'$set': key})
+                update = 1
                 print(res)
-
-        data['uuid'] = abs
-        conn.insert_one_col(col, data)
+        if not update:
+            data['uuid'] = abs
+            conn.insert_one_col(col, data)
         return HttpResponse(data)
