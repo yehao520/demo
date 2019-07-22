@@ -5,37 +5,22 @@
     <meta charset="utf-8">
     <title>TEST</title>
     <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript" src="../static/track.js"></script>
+    <script type="text/javascript" src="../static/picker.js"></script>
 </head>
 
 <body>
-    <input type="button" value="TEST" onclick="showVisitorInfo();">
+    <input type="button" value="TEST" onclick="showVisitorInfo('Click',  'Click TEST Button');">
     <hr>
-    <a href="/vh/" onclick="roution();">JUMP</a>
+    <a href="/vh/" onclick="">JUMP</a>
 </body>
 
 </html>
 <script>
-    function showVisitorInfo(event = "Click", action = "Click TEST Button") {
-        var evt = Picker.util.createEvent(event, action);
-        Picker.util.updateEvent(evt)
-
-        var data = Picker.data
-
-        Picker.util.sendDataToServer('/track/', { data: JSON.stringify(data) });
+    function showVisitorInfo(event, action) {
+        let picker = Picker
+        dt = picker.data(event, action);
+        picker.util.sendDataToServer('/track/', { dt: JSON.stringify(dt) })
+        console.log(dt)
     };
 
-    function routine(event = "Routine", action = "View Next Page") {
-        var evt = Picker.util.createEvent(event, action);
-        Picker.data.event.push(evt)
-        Picker.util.sendDataToServer('/track/',
-            {
-                data: JSON.stringify(data)
-            });
-    }
-    console.log(screen.width, screen.height)
-    console.log(navigator.userAgent.toLowerCase())
-
-    var a = Picker.util.getExplorerInfo()
-    console.log(a)
 </script>

@@ -50,16 +50,21 @@ Picker.util.calculateDuration = function (start, end) {
     return end - start
 }
 
-/* 设置Cookie
-   name: cookie名
-   value: cookie值
-   days: cookie存活时间
-*/
+/**
+ * 设置Cookie
+ * name: cookie名
+ * value: cookie值
+ * days: cookie存活时间
+ */
 Picker.util.setCookie = function (name, value, days) {
     if (typeof value != "undefined") {
         var date = new Date();
         date.setDate(date.getDate() + days);
-        document.cookie = name + "=" + escape(value) + ((typeof days == "undefined") ? "" : ";expiredays=" + date.toGMTString()) + "; path=/";
+        document.cookie = name
+            + "="
+            + escape(value)
+            + ((typeof days == "undefined") ? "" : ";expiredays=" + date.toGMTString())
+            + "; path=/";
     }
     return Picker.util.getCookie(name);
 };
@@ -115,6 +120,18 @@ Picker.util.getExplorerInfo = function () {
 
     // Edge判断不出来
 }
+
+/**
+ * 获取设备信息
+ */
+Picker.util.getDeviceData = function () {
+    var browser = Picker.util.getExplorerInfo();
+    var resolution = Picker.getScreenResolution();
+    return {
+        browser: browser,
+        resolution: resolution
+    }
+};
 
 /**
  * 获取屏幕分辨率
@@ -183,15 +200,11 @@ Picker.util.sendDataToServer = function (url, data) {
     });
 };
 
-var aid = 'aid' + Picker.util.getAnonymousID()
-Picker.util.setCookie('aid', aid, 1)
-
-Picker.data = function () {
+Picker.data = function (event = 'Viewed Page', action = 'Viewed Page' + document.title) {
     var data = {};
 
     var title = document.title;
     var href = location.href;
-    // var referrer = opener.location.href
     var referrer = document.referrer;
 
     data.pageInstanceID = "";
@@ -206,7 +219,7 @@ Picker.data = function () {
     data.user.push(user)
 
     data.event = []
-    evt = Picker.util.createEvent('Viewed Page', 'Viewed ' + document.title + ' Page')
+    evt = Picker.util.createEvent(event, action)
     data.event.push(evt)
 
     data.page = {
@@ -217,17 +230,18 @@ Picker.data = function () {
         }
     }
 
-    Picker.util.sendDataToServer(
-        '/track/',
-        {
-            ud: JSON.stringify(data),
-            dd: JSON.stringify({
-                ip: '127.0.0.1',
-                browser: Picker.util.getExplorerInfo(),
-                resolution: Picker.util.getScreenResolution()
-            })
+    let dt = {
+        ud: data,
+        dd: {
+            browser: Picker.util.getExplorerInfo(),
+            resolution: Picker.util.getScreenResolution()
         }
-    )
-    return data
-}();
+    }
+    return dt
+};
 
+// 发送数据
+var dt = Picker.data();
+Picker.util.sendDataToServer(
+    '/track/', { dt: JSON.stringify(dt) }
+)
